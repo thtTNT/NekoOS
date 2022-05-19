@@ -6,7 +6,7 @@
 #pragma once
 
 #include "../utils/Bitmap.h"
-#include "memory.h"
+#include "Memory.h"
 
 
 class PageFrameAllocator {
@@ -26,11 +26,13 @@ public:
 
     void unlockPage(size_t index);
 
-    size_t getTotalMemory() const;
+    void* requestPage();
 
-    size_t getReserveMemory() const;
+    [[nodiscard]] size_t getTotalMemory() const;
 
-    size_t getLockedMemory() const;
+    [[nodiscard]] size_t getReserveMemory() const;
+
+    [[nodiscard]] size_t getLockedMemory() const;
 };
 
 extern PageFrameAllocator GlobalPageFrameAllocator;

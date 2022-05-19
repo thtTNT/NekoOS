@@ -12,7 +12,7 @@ bool Bitmap::get(uint64_t index) {
     uint64_t block = index / 8;
     uint8_t offset = index % 8;
     uint8_t blockData = *(this->map + block);
-    return (blockData >> offset) & 1;
+    return (blockData << offset) & 0b10000000;
 }
 
 void Bitmap::set(uint64_t index, bool value) {

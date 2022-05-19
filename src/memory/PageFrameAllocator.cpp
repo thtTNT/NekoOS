@@ -63,3 +63,13 @@ size_t PageFrameAllocator::getReserveMemory() const {
 size_t PageFrameAllocator::getLockedMemory() const {
     return lockedMemory;
 }
+
+void* PageFrameAllocator::requestPage() {
+    for (int index = 0; index < PAGE_COUNT; index++) {
+        if (!this->bitmap[index]) {
+            this->lockPage(index);
+            return (void*) (uint64_t) (KERNEL_START + (index * PAGE_SIZE));
+        }
+    }
+    return nullptr;
+}
