@@ -5,10 +5,10 @@ OBJ_DIR=build/bin
 BUILD_DIR=build
 LD=riscv64-unknown-elf-ld
 CC=riscv64-unknown-elf-gcc
-CFLAGS=-ffreestanding -fshort-wchar -fno-exceptions -std=gnu++17 -c -g
+CFLAGS=-ffreestanding -fshort-wchar -fno-exceptions -mcmodel=medany -std=gnu++17 -nostdlib -c -ggdb
 LDFLAGS = -z max-page-size=4096
 
-SRC = $(wildcard $(SRC_DIR)/*.cpp)
+SRC = $(wildcard $(SRC_DIR)/*.cpp $(SRC_DIR)/**/*.cpp)
 ASM_SRC = $(wildcard $(SRC_DIR)/*.S)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.S, $(OBJ_DIR)/%_asm.o, $(ASM_SRC))

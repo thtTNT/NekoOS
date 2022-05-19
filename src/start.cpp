@@ -4,8 +4,10 @@
 
 __attribute__ ((aligned (16))) char stack0[4096];
 
-extern "C" void _start() {
-    char* buffer = (char*) 0x10000000;
-    *buffer = 'h';
+#include "devices/render.h"
+
+extern "C" void kernel() {
+    int i = 1; // Hack GDB bug, now necessary
+    Render::printString("Hello World!!!");
     while (true) {}
 }
