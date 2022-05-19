@@ -24,4 +24,6 @@ SECTIONS
         *(COMMON)
         *(.bss)
     }
+
+    PROVIDE(KERNEL_END_ADDRESS = .);
 }
