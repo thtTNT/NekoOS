@@ -35,9 +35,3 @@ struct PageTable {
     void mapMemory(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
 
 }__attribute__((aligned(0x1000)));
-
-struct SATP {
-    uint64_t physicalPageNumber: 44;
-    uint16_t asid: 16;
-    uint8_t mode: 4;
-}__attribute__((packed));

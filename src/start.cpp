@@ -1,52 +1,35 @@
 //
-// Created by 屠昊天 on 2022/5/19.
+// Created by 屠昊天 on 2022/5/21.
 //
+
+#include "utils/riscv.h"
+
+void main0();
 
 __attribute__ ((aligned (16))) char stack0[4096];
 
+extern "C" void start() {
+    MSTATUS mstatus = r_mstatus();
+    mstatus.mpp = SUPERVISOR;
+    w_mstatus(mstatus);
 
-#include "devices/render.h"
-#include "memory/PageFrameAllocator.h"
-#include "memory/PageTable.h"
-#include "utils/riscv.h"
+    w_mepc((void*) main0);
 
-void initPageFrameAllocator() {
-    GlobalPageFrameAllocator = PageFrameAllocator();
-}
+    w_satp(SATP{});
 
-void initPageTable() {
-    auto page = GlobalPageFrameAllocator.requestPage();
-    memset(page, 0, PAGE_SIZE);
-    auto pageTable = (PageTable*) page;
+    // delegate all M-mode interrupt and exception to S-mode
+    w_medeleg(0xffffffff);
+    w_mideleg(0xffffffff);
 
-    // map kernel code
-    for (uint64_t address = KERNEL_START; address < KERNEL_END; address += PAGE_SIZE) {
-        pageTable->mapMemory((void*) address, (void*) address);
-    }
+    // enable all interrupt and exception in S-mode
+    SIE sie = r_sie();
+    sie.seie = true;
+    sie.stie = true;
+    sie.ssie = true;
+    w_sie(sie);
 
-    // map page frame allocator bit map
-    for (uint64_t address = (KERNEL_END / PAGE_SIZE + 1) * PAGE_SIZE;
-         address < (KERNEL_END / PAGE_SIZE + 1) * PAGE_SIZE + MEMORY_SIZE / PAGE_SIZE / 8; address += PAGE_SIZE) {
-        pageTable->mapMemory((void*) address, (void*) address);
-    }
+    w_pmpaddr0(0x3fffffffffffffull);
+    w_pmpcfg0(0xf);
 
-    // map uart0
-    pageTable->mapMemory((void*) 0x10000000, (void*) 0x10000000);
-
-    SATP satp = SATP{};
-    satp.physicalPageNumber = (uint64_t) page / PAGE_SIZE;
-    satp.mode = 0x8;
-    w_satp(*(uint64_t*) &satp);
-    sfence_vma();
-}
-
-
-extern "C" void kernel() {
-    int i = 1; // Hack GDB bug, not necessary
-    initPageFrameAllocator();
-    initPageTable();
-    Render::print("Total Memory: %lu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
-    Render::print("Reserve Memory: %lu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
-    Render::print("Locked Memory: %lu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
-    while (true) {}
+    asm volatile("mret");
 }
