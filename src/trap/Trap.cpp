@@ -6,6 +6,6 @@
 #include "../devices/render.h"
 
 
-extern "C" void onTrap() {
+void onTrap() {
     Render::print("TRAP!");
 }

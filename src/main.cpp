@@ -55,5 +55,7 @@ void main0() {
     Render::print("Total Memory: %lu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
     Render::print("Reserve Memory: %lu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %lu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
+    int* p = (int*) 0x80000000000;
+    *p = 199;
     while (true) {}
 }

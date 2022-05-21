@@ -18,8 +18,8 @@ extern "C" void start() {
     w_satp(SATP{});
 
     // delegate all M-mode interrupt and exception to S-mode
-    w_medeleg(0xffffffff);
-    w_mideleg(0xffffffff);
+    w_medeleg(0xffff);
+    w_mideleg(0xffff);
 
     // enable all interrupt and exception in S-mode
     SIE sie = r_sie();

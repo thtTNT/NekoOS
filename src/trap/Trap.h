@@ -5,4 +5,5 @@
 
 #pragma once
 
-extern "C" void onTrap();
+#pragma section .trap
+extern "C" void onTrap() __attribute__((section(".trap")));

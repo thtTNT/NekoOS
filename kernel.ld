@@ -8,7 +8,7 @@ SECTIONS
     {
         *(.text)
         . = ALIGN(0x4);
-        onTrap = .;
+        *(.trap)
     }
 
     .data : ALIGN(0x1000)
