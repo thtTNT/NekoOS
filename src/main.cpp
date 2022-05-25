@@ -3,10 +3,11 @@
 //
 
 
-#include "devices/render.h"
 #include "memory/PageFrameAllocator.h"
 #include "memory/PageTable.h"
 #include "utils/riscv.h"
+#include "driver/render.h"
+#include "driver/VirtioDisk.h"
 
 void initPageFrameAllocator() {
     GlobalPageFrameAllocator = PageFrameAllocator();
@@ -31,6 +32,10 @@ void initPageTable() {
     // map uart0
     pageTable->mapMemory((void*) 0x10000000, (void*) 0x10000000);
 
+    // map virtio disk
+    pageTable->mapMemory((void*) VIRTIO_ADDRESS, (void*) VIRTIO_ADDRESS);
+
+
     SATP satp = SATP{};
     satp.physicalPageNumber = (uint64_t) page / PAGE_SIZE;
     satp.mode = 0x8;
@@ -47,15 +52,19 @@ void initTrap() {
     w_stvec(stvec);
 }
 
+void initDisk() {
+    PrimaryDisk = VirtioDisk();
+}
+
 void main0() {
     int i = 1; // Hack GDB bug, not necessary
+    Render::print("====================NekoOS v0.1====================\n");
     initPageFrameAllocator();
     initPageTable();
     initTrap();
+    initDisk();
     Render::print("Total Memory: %lu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
     Render::print("Reserve Memory: %lu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %lu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
-    int* p = (int*) 0x80000000000;
-    *p = 199;
     while (true) {}
 }

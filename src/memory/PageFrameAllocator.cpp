@@ -4,7 +4,7 @@
 
 #include "PageFrameAllocator.h"
 
-PageFrameAllocator GlobalPageFrameAllocator;
+PageFrameAllocator GlobalPageFrameAllocator; // NOLINT(cert-err58-cpp)
 
 
 size_t addressToPageIndex(uint64_t address) {
