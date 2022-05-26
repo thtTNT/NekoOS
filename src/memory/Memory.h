@@ -4,11 +4,7 @@
 
 
 #pragma once
-#define KERNEL_START 0x80000000
-#define KERNEL_END ((uint64_t)KERNEL_END_ADDRESS)
-#define MEMORY_SIZE 128 * 1024 * 1024
-#define PAGE_SIZE 4096
-#define PAGE_COUNT (MEMORY_SIZE / PAGE_SIZE)
+#include "MemoryLayout.h"
 
 #include <cstddef>
 #include <cstdint>

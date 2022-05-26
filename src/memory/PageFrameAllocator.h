@@ -15,6 +15,7 @@ private:
     size_t totalMemory;
     size_t reserveMemory;
     size_t lockedMemory;
+    size_t heap;
 public:
     PageFrameAllocator();
 
@@ -27,6 +28,8 @@ public:
     void unlockPage(size_t index);
 
     void* requestPage();
+
+    void* requestHeapPage();
 
     [[nodiscard]] size_t getTotalMemory() const;
 

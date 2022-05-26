@@ -35,3 +35,5 @@ struct PageTable {
     void mapMemory(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
 
 }__attribute__((aligned(0x1000)));
+
+extern PageTable* KernelPageTable;

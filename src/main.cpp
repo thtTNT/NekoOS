@@ -8,9 +8,11 @@
 #include "utils/riscv.h"
 #include "driver/render.h"
 #include "driver/VirtioDisk.h"
+#include "memory/Heap.h"
 
 void initPageFrameAllocator() {
     GlobalPageFrameAllocator = PageFrameAllocator();
+    Render::print("Page Frame Allocator initialized!\n");
 }
 
 void initPageTable() {
@@ -18,14 +20,8 @@ void initPageTable() {
     memset(page, 0, PAGE_SIZE);
     auto pageTable = (PageTable*) page;
 
-    // map kernel code
-    for (uint64_t address = KERNEL_START; address < KERNEL_END; address += PAGE_SIZE) {
-        pageTable->mapMemory((void*) address, (void*) address);
-    }
-
-    // map page frame allocator bit map
-    for (uint64_t address = (KERNEL_END / PAGE_SIZE + 1) * PAGE_SIZE;
-         address < (KERNEL_END / PAGE_SIZE + 1) * PAGE_SIZE + MEMORY_SIZE / PAGE_SIZE / 8; address += PAGE_SIZE) {
+    // map all physical memory
+    for (uint64_t address = MEMORY_START; address < MEMORY_END; address += PAGE_SIZE) {
         pageTable->mapMemory((void*) address, (void*) address);
     }
 
@@ -41,6 +37,9 @@ void initPageTable() {
     satp.mode = 0x8;
     w_satp(satp);
     sfence_vma();
+
+    KernelPageTable = pageTable;
+    Render::print("Page Table initialized!\n");
 }
 
 extern char onTrap[];
@@ -50,21 +49,35 @@ void initTrap() {
     stvec.mode = 0;
     stvec.base = ((uint64_t) onTrap >> 2);
     w_stvec(stvec);
+
+    Render::print("Trap initialized!\n");
 }
 
 void initDisk() {
     PrimaryDisk = VirtioDisk();
 }
 
+void initHeap() {
+    heap::init();
+
+    Render::print("Heap initialized!\n");
+}
+
 void main0() {
     int i = 1; // Hack GDB bug, not necessary
     Render::print("====================NekoOS v0.1====================\n");
+    initTrap();
     initPageFrameAllocator();
     initPageTable();
-    initTrap();
+    initHeap();
+    mfree(malloc(8196));
+    malloc(1024);
+    malloc(1024);
+    malloc(1024);
+    malloc(1024);
     initDisk();
-    Render::print("Total Memory: %lu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
-    Render::print("Reserve Memory: %lu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
-    Render::print("Locked Memory: %lu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
+    Render::print("Total Memory: %llu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
+    Render::print("Reserve Memory: %llu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
+    Render::print("Locked Memory: %llu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
     while (true) {}
 }

@@ -12,22 +12,20 @@ size_t addressToPageIndex(uint64_t address) {
 }
 
 PageFrameAllocator::PageFrameAllocator() {
+    this->heap = addressToPageIndex(PAGE_BITMAP_END);
     this->totalMemory = MEMORY_SIZE;
     this->reserveMemory = 0;
     this->lockedMemory = 0;
 
     // init bitmap
-    int requestPage = MEMORY_SIZE / PAGE_SIZE / 8 / PAGE_SIZE;
-    int startPage = (int) (KERNEL_END - KERNEL_START) / PAGE_SIZE + 1;
-    void* mapAddress = (void*) (uint64_t) (KERNEL_START + startPage * PAGE_SIZE);
-    memset(mapAddress, 0, requestPage * PAGE_SIZE);
-    this->bitmap = Bitmap{MEMORY_SIZE / PAGE_SIZE / 8, (uint8_t*) mapAddress};
+    memset((void*) PAGE_BITMAP_ADDRESS, 0, PAGE_BITMAP_SIZE);
+    this->bitmap = Bitmap{MEMORY_SIZE / PAGE_SIZE / 8, (uint8_t*) PAGE_BITMAP_ADDRESS};
 
     //reserve kernel and bitmap memory
-    for (size_t index = addressToPageIndex(KERNEL_START); index <= addressToPageIndex(KERNEL_END); index++) {
+    for (size_t index = addressToPageIndex(KERNEL_START); index < addressToPageIndex(KERNEL_END); index++) {
         this->reservePage(index);
     }
-    for (size_t index = startPage; index < startPage + requestPage; index++) {
+    for (size_t index = addressToPageIndex(PAGE_BITMAP_ADDRESS); index < addressToPageIndex(PAGE_BITMAP_END); index++) {
         this->reservePage(index);
     }
 }
@@ -65,7 +63,7 @@ size_t PageFrameAllocator::getLockedMemory() const {
 }
 
 void* PageFrameAllocator::requestPage() {
-    for (int index = 0; index < PAGE_COUNT; index++) {
+    for (int index = PAGE_COUNT - 1; index > heap; index--) {
         if (!this->bitmap[index]) {
             this->lockPage(index);
             return (void*) (uint64_t) (KERNEL_START + (index * PAGE_SIZE));
@@ -73,3 +71,15 @@ void* PageFrameAllocator::requestPage() {
     }
     return nullptr;
 }
+
+void* PageFrameAllocator::requestHeapPage() {
+    for (int index = HEAP_START_PAGE; index < PAGE_COUNT; index++) {
+        if (!this->bitmap[index]) {
+            this->reservePage(index);
+            heap = index;
+            return (void*) (uint64_t) (KERNEL_START + (index * PAGE_SIZE));
+        }
+    }
+    return nullptr;
+}
+

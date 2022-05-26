@@ -42,18 +42,24 @@ void Render::print(const char* format, ...) {
 
     while (*p != '\0') {
         if (*p == '%') {
-            p++;
-            if (*p == '\0') {
-                return;
-            }
-            if (*p == 'l') {
-                p++;
-                if (*p == '\0') {
+            switch (*(++p)) {
+                case '\0':
                     return;
-                }
-                if (*p == 'u') {
-                    printUint64(va_arg(args, uint64_t));
-                }
+                case 'l':
+                    switch (*(++p)) {
+                        case '\0':
+                            return;
+                        case 'l':
+                            switch (*(++p)) {
+                                case 'u': // llu
+                                    printUint64(va_arg(args, uint64_t));
+                            }
+                            break;
+                    }
+                    break;
+                case 's':
+                    printString(va_arg(args, const char*));
+                    break;
             }
         } else {
             Render::putChar(*p);

@@ -4,6 +4,9 @@
 
 #include "PageTable.h"
 #include "PageFrameAllocator.h"
+#include "../utils/riscv.h"
+
+PageTable* KernelPageTable;
 
 void PageTable::mapMemory(void* virtualAddress, void* physicalAddress) {
     mapMemory(*(VirtualAddress*) &virtualAddress, *(PhysicalAddress*) &physicalAddress);
