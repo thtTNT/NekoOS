@@ -30,9 +30,9 @@ struct PageDirectory {
 struct PageTable {
     PageDirectory root;
 
-    void mapMemory(void* virtualAddress, void* physicalAddress);
+    void mapMemory(void* virtualAddress, void* physicalAddress, size_t pageAmount = 1);
 
-    void mapMemory(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
+    void mapMemory(VirtualAddress virtualAddress, PhysicalAddress physicalAddress, size_t pageAmount = 1);
 
 }__attribute__((aligned(0x1000)));
 

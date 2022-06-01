@@ -6,11 +6,11 @@ BUILD_DIR=build
 LD=riscv64-unknown-elf-ld
 CC=riscv64-unknown-elf-gcc
 NODE = node
-CFLAGS=-ffreestanding -fshort-wchar -fno-exceptions -mcmodel=medany -std=gnu++17 -nostdlib -c -ggdb
+CFLAGS=-ffreestanding -fshort-wchar -no-pie -fno-exceptions -mcmodel=medany -std=gnu++17 -nostdlib -c -ggdb -Wall -Werror
 LDFLAGS = -z max-page-size=4096
 
 SRC = $(wildcard $(SRC_DIR)/*.cpp $(SRC_DIR)/**/*.cpp)
-ASM_SRC = $(wildcard $(SRC_DIR)/*.S)
+ASM_SRC = $(wildcard $(SRC_DIR)/*.S $(SRC_DIR)/**/*.S)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.S, $(OBJ_DIR)/%_asm.o, $(ASM_SRC))
 

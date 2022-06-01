@@ -67,6 +67,46 @@ struct MSTATUS {
     uint32_t reserve4: 27;
     bool sd: 1;
 }__attribute__((packed));
+static_assert(sizeof(MSTATUS) == 0x8);
+
+
+struct SSTATUS {
+    bool uie: 1;
+    bool sie: 1;
+    uint8_t reserve: 2;
+    bool upie: 1;
+    bool spie: 1;
+    uint8_t reserve1: 2;
+    bool spp: 1;
+    uint8_t reserve2: 4;
+    uint8_t fs: 2;
+    uint16_t : 2;
+    uint8_t reserve3: 1;
+    bool sum: 1;
+    bool mxr: 1;
+    uint16_t reserve4: 12;
+    bool uxl: 2;
+    uint32_t reserve5: 29;
+    bool sd: 1;
+}__attribute__((packed));
+static_assert(sizeof(SSTATUS) == 0x8);
+
+
+struct SCAUSE {
+    uint64_t code: 63;
+    bool interrupt: 1;
+
+    bool operator==(const SCAUSE &other) {
+        return *(uint64_t*) this == *(uint64_t*) &other;
+    }
+
+}__attribute__((packed));
+
+static_assert(sizeof(SCAUSE) == 0x8);
+
+#define SCAUSE_INTERRUPT_USER_SOFTWARE_INTERRUPT (SCAUSE{0,true})
+#define SCAUSE_INTERRUPT_SUPERVISOR_EXTERNAL_INTERRUPT (SCAUSE{9,true})
+
 
 static inline SIE r_sie() {
     SIE sie{};
@@ -78,6 +118,34 @@ static inline MSTATUS r_mstatus() {
     uint64_t mstatus;
     asm volatile("csrr %0, mstatus" : "=r" (mstatus));
     return *(MSTATUS*) &mstatus;
+}
+
+static inline SCAUSE r_scause() {
+    uint64_t scause;
+    asm volatile("csrr %0, scause" : "=r" (scause));
+    return *(SCAUSE*) &scause;
+}
+
+static inline uint64_t r_tp() {
+    uint64_t value;
+    asm volatile("mv %0, tp" : "=r" (value));
+    return value;
+}
+
+static inline uint64_t r_mhartid() {
+    uint64_t value;
+    asm volatile("csrr %0, mhartid" : "=r" (value));
+    return value;
+}
+
+static inline SSTATUS r_sstatus() {
+    uint64_t value;
+    asm volatile("csrr %0, sstatus" : "=r" (value));
+    return *(SSTATUS*) &value;
+}
+
+static inline void w_tp(uint64_t value) {
+    asm volatile("mv tp, %0" : : "r" (value));
 }
 
 static inline void w_pmpaddr0(uint64_t value) {
@@ -118,6 +186,16 @@ static inline void w_satp(SATP satp) {
 
 static inline void w_sie(SIE sie) {
     asm volatile("csrw sie, %0" : : "r" (*(uint64_t*) &sie));
+}
+
+static inline void w_sstatus(SSTATUS sstatus) {
+    asm volatile("csrw sstatus, %0" : : "r" (*(uint64_t*) &sstatus));
+}
+
+static inline void setInterrupt(bool value) {
+    auto sstatus = r_sstatus();
+    sstatus.sie = value;
+    w_sstatus(sstatus);
 }
 
 // flush the TLB.

@@ -8,7 +8,17 @@
 #define PAGE_SIZE 4096
 #define PAGE_COUNT (MEMORY_SIZE / PAGE_SIZE)
 
-#define MEMORY_START 0x80000000
+#define MEMORY_START 0x0L
+
+// uart0
+#define UART0 0x10000000L
+
+// virtio mmio interface
+#define VIRTIO0 0x10001000L
+
+// platform-level interrupt controller
+#define PLIC 0x0c000000L
+#define PLIC_SIZE 0x400000
 
 // Kernel
 #define KERNEL_START 0x80000000
@@ -25,4 +35,4 @@
 #define HEAP_START_PAGE ((HEAP_START_ADDRESS - KERNEL_START) / PAGE_SIZE)
 
 
-#define MEMORY_END (MEMORY_START + MEMORY_SIZE)
+#define MEMORY_END (KERNEL_START + MEMORY_SIZE)

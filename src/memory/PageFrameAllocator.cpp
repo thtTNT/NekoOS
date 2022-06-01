@@ -3,6 +3,7 @@
 //
 
 #include "PageFrameAllocator.h"
+#include "../utils/assert.h"
 
 PageFrameAllocator GlobalPageFrameAllocator; // NOLINT(cert-err58-cpp)
 
@@ -63,10 +64,30 @@ size_t PageFrameAllocator::getLockedMemory() const {
 }
 
 void* PageFrameAllocator::requestPage() {
-    for (int index = PAGE_COUNT - 1; index > heap; index--) {
+    for (size_t index = PAGE_COUNT - 1; index > heap; index--) {
         if (!this->bitmap[index]) {
             this->lockPage(index);
             return (void*) (uint64_t) (KERNEL_START + (index * PAGE_SIZE));
+        }
+    }
+    return nullptr;
+}
+
+void* PageFrameAllocator::requestPages(size_t amount) {
+    uint8_t count = 0;
+    for (size_t index = PAGE_COUNT - 1; index > heap; index--) {
+        if (!this->bitmap[index]) {
+            if (count == amount - 1) {
+                for (size_t i = index; i <= index + count; i++) {
+                    assert(!this->bitmap[i]);
+                    this->lockPage(i);
+                }
+                return (void*) (uint64_t) (KERNEL_START + (index * PAGE_SIZE));
+            } else {
+                count++;
+            }
+        } else {
+            count = 0;
         }
     }
     return nullptr;

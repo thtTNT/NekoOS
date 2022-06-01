@@ -28,8 +28,12 @@ extern "C" void start() {
     sie.ssie = true;
     w_sie(sie);
 
+
     w_pmpaddr0(0x3fffffffffffffull);
     w_pmpcfg0(0xf);
+
+    uint64_t cpuId = r_mhartid();
+    w_tp(cpuId);
 
     asm volatile("mret");
 }

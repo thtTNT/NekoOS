@@ -36,6 +36,8 @@ public:
     [[nodiscard]] size_t getReserveMemory() const;
 
     [[nodiscard]] size_t getLockedMemory() const;
+
+    void* requestPages(size_t amount);
 };
 
 extern PageFrameAllocator GlobalPageFrameAllocator;

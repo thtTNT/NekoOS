@@ -35,6 +35,24 @@ void printUint64(uint64_t number) {
     }
 }
 
+void printHex64(uint64_t number) {
+    static const char* chars = "0123456789ABCDEF";
+    if (number == 0) {
+        Render::putChar('0');
+        return;
+    }
+    char buffer[21];
+    int size = 0;
+    while (number != 0) {
+        buffer[size] = chars[number % 16];
+        number /= 16;
+        size++;
+    }
+    for (int i = size - 1; i >= 0; i--) {
+        Render::putChar(buffer[i]);
+    }
+}
+
 void Render::print(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -54,6 +72,13 @@ void Render::print(const char* format, ...) {
                                 case 'u': // llu
                                     printUint64(va_arg(args, uint64_t));
                             }
+                            break;
+                        case 'u':
+                            printUint64(va_arg(args, uint32_t));
+                            break;
+                        case 'x':
+                        case 'X':
+                            printHex64(va_arg(args, uint64_t));
                             break;
                     }
                     break;
