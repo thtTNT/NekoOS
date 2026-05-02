@@ -8,11 +8,11 @@
 
 PageTable* KernelPageTable;
 
-void PageTable::mapMemory(void* virtualAddress, void* physicalAddress, size_t pageAmount) {
-    mapMemory(*(VirtualAddress*) &virtualAddress, *(PhysicalAddress*) &physicalAddress, pageAmount);
+void PageTable::mapMemory(void* virtualAddress, void* physicalAddress, size_t pageAmount, bool user) {
+    mapMemory(*(VirtualAddress*) &virtualAddress, *(PhysicalAddress*) &physicalAddress, pageAmount, user);
 }
 
-void PageTable::mapMemory(VirtualAddress startVirtualAddress, PhysicalAddress startPhysicalAddress, size_t pageAmount) {
+void PageTable::mapMemory(VirtualAddress startVirtualAddress, PhysicalAddress startPhysicalAddress, size_t pageAmount, bool user) {
     for (size_t i = 0; i < pageAmount; i++) {
         auto virtualAddress = startVirtualAddress + i * PAGE_SIZE;
         auto physicalAddress = startPhysicalAddress + i * PAGE_SIZE;
@@ -41,6 +41,7 @@ void PageTable::mapMemory(VirtualAddress startVirtualAddress, PhysicalAddress st
             pd->entries[virtualAddress.l0].readable = true;
             pd->entries[virtualAddress.l0].writable = true;
             pd->entries[virtualAddress.l0].executable = true;
+            pd->entries[virtualAddress.l0].user = user;
         }
     }
 }

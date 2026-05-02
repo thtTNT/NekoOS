@@ -4,7 +4,7 @@
 
 
 #include "memory/PageFrameAllocator.h"
-#include "memory/PageTable.h"
+#include "memory/KernelMapping.h"
 #include "memory/Heap.h"
 #include "memory/Memory.h"
 #include "utils/riscv.h"
@@ -20,32 +20,7 @@ void initPageFrameAllocator() {
 }
 
 void initPageTable() {
-    auto page = GlobalPageFrameAllocator.requestPage();
-    memset(page, 0, PAGE_SIZE);
-    auto pageTable = (PageTable*) page;
-
-    // map all physical memory
-    for (uint64_t address = KERNEL_START; address < MEMORY_END; address += PAGE_SIZE) {
-        pageTable->mapMemory((void*) address, (void*) address);
-    }
-
-    // map uart0
-    pageTable->mapMemory((void*) 0x10000000, (void*) 0x10000000);
-
-    // map virtio disk
-    pageTable->mapMemory((void*) VIRTIO_ADDRESS, (void*) VIRTIO_ADDRESS);
-
-    // map PLIC
-    static_assert(PLIC_SIZE % PAGE_SIZE == 0);
-    pageTable->mapMemory((void*) PLIC, (void*) PLIC, PLIC_SIZE / PAGE_SIZE);
-
-    SATP satp = SATP{};
-    satp.physicalPageNumber = (uint64_t) page / PAGE_SIZE;
-    satp.mode = 0x8;
-    w_satp(satp);
-    sfence_vma();
-
-    KernelPageTable = pageTable;
+    initKernelPageTable();
     Render::print("Page Table initialized!\n");
 }
 
