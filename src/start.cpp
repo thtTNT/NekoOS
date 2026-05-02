@@ -3,37 +3,24 @@
 //
 
 #include "utils/riscv.h"
+#include "trap/clint.h"
 
 void main0();
 
 __attribute__ ((aligned (16))) char stack0[4096];
 
 extern "C" void start() {
-    MSTATUS mstatus = r_mstatus();
-    mstatus.mpp = SUPERVISOR;
-    w_mstatus(mstatus);
+    // OpenSBI has already configured medeleg, mideleg, and PMP.
+    // We arrive in S-mode with interrupts disabled.
 
-    w_mepc((void*) main0);
-
-    w_satp(SATP{});
-
-    // delegate all M-mode interrupt and exception to S-mode
-    w_medeleg(0xffff);
-    w_mideleg(0xffff);
-
-    // enable all interrupt and exception in S-mode
     SIE sie = r_sie();
     sie.seie = true;
     sie.stie = true;
     sie.ssie = true;
     w_sie(sie);
 
+    // Kick off the first timer interrupt
+    clint::setNextTimer();
 
-    w_pmpaddr0(0x3fffffffffffffull);
-    w_pmpcfg0(0xf);
-
-    uint64_t cpuId = r_mhartid();
-    w_tp(cpuId);
-
-    asm volatile("mret");
+    main0();
 }

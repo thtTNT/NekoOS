@@ -21,7 +21,7 @@
 #define PLIC_SIZE 0x400000
 
 // Kernel
-#define KERNEL_START 0x80000000
+#define KERNEL_START 0x80200000  // OpenSBI occupies 0x80000000-0x80200000
 #define KERNEL_END ((uint64_t)KERNEL_END_ADDRESS)
 
 // Page Bitmap

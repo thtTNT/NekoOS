@@ -37,7 +37,7 @@ $(IMAGE_PATH):
 	$(NODE) filesystem/makeFileSystem.js
 
 # GDB
-QEMU_OPTIONS = -machine virt -bios none -kernel $(BUILD_DIR)/kernel -m 128M -smp 1 -nographic
+QEMU_OPTIONS = -machine virt -kernel $(BUILD_DIR)/kernel -m 128M -smp 1 -nographic
 QEMU_OPTIONS += -drive file=$(IMAGE_PATH),if=none,format=raw,id=x0
 QEMU_OPTIONS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 

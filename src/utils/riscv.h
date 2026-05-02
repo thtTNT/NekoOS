@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 
 struct SATP {
     uint64_t physicalPageNumber: 44;
@@ -105,6 +105,7 @@ struct SCAUSE {
 static_assert(sizeof(SCAUSE) == 0x8);
 
 #define SCAUSE_INTERRUPT_USER_SOFTWARE_INTERRUPT (SCAUSE{0,true})
+#define SCAUSE_INTERRUPT_SUPERVISOR_TIMER_INTERRUPT (SCAUSE{5,true})
 #define SCAUSE_INTERRUPT_SUPERVISOR_EXTERNAL_INTERRUPT (SCAUSE{9,true})
 
 
