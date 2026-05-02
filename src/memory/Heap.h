@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include "Memory.h"
-#include "../utils/List.h"
 
 #define MIN_SEGMENT_SIZE 0b1000
 
