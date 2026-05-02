@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 
 #define VIRTIO0_IRQ 1
 #define UART0_IRQ 10

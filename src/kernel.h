@@ -6,7 +6,7 @@
 #pragma once
 
 #include "./utils/riscv.h"
-#include <cstdint>
+#include <stdint.h>
 
 static inline uint64_t cpuid() {
     return r_tp();

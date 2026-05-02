@@ -3,7 +3,7 @@
 //
 
 #include "render.h"
-#include <cstdint>
+#include <stdint.h>
 
 void Render::putChar(char chr) {
     char* p = (char*) (RENDER_MEMORY);

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
 
 struct Bitmap {
     size_t size;

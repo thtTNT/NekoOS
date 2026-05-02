@@ -7,8 +7,8 @@
 
 #include "MemoryLayout.h"
 
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
 
 extern char KERNEL_END_ADDRESS[];
 

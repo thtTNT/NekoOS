@@ -22,8 +22,8 @@
 #define VRING_DESC_F_NEXT  1 // chained with another descriptor
 #define VRING_DESC_F_WRITE 2 // device writes (vs read)
 
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
 
 struct VirtioQueueDescription {
     uint64_t address;
@@ -133,6 +133,12 @@ private:
 
 public:
     VirtioDisk();
+
+    void operate(DiskOperationRequest &request);
+
+    void onInterrupt();
+
+    VirtioDisk &operator=(const VirtioDisk &other);
 };
 
 extern VirtioDisk PrimaryDisk;

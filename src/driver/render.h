@@ -6,7 +6,7 @@
 #pragma once
 #define RENDER_MEMORY 0x10000000
 
-#include <cstdarg>
+#include <stdarg.h>
 
 class Render {
 public:
