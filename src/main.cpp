@@ -11,6 +11,7 @@
 #include "driver/render.h"
 #include "driver/VirtioDisk.h"
 #include "trap/plic.h"
+#include "process/Scheduler.h"
 
 
 void initPageFrameAllocator() {
@@ -37,7 +38,6 @@ void initPageTable() {
     // map PLIC
     static_assert(PLIC_SIZE % PAGE_SIZE == 0);
     pageTable->mapMemory((void*) PLIC, (void*) PLIC, PLIC_SIZE / PAGE_SIZE);
-
 
     SATP satp = SATP{};
     satp.physicalPageNumber = (uint64_t) page / PAGE_SIZE;
@@ -73,6 +73,20 @@ void initHeap() {
     Render::print("Heap initialized!\n");
 }
 
+void testEntryA() {
+    while (true) {
+        Render::print("A");
+        for (volatile int i = 0; i < 1000000; i++);
+    }
+}
+
+void testEntryB() {
+    while (true) {
+        Render::print("B");
+        for (volatile int i = 0; i < 1000000; i++);
+    }
+}
+
 void main0() {
     Render::print("====================NekoOS v0.1====================\n");
     initPageFrameAllocator();
@@ -80,18 +94,26 @@ void main0() {
     initHeap();
     initTrap();
     initDisk();
+    initScheduler();
+
+    Process* idle = (Process*)malloc(sizeof(Process));
+    idle->pid = 0;
+    idle->state = RUNNING;
+    idle->pageTable = KernelPageTable;
+    memset(&idle->context, 0, sizeof(ProcessContext));
+    list_init(&idle->node);
+    current = idle;
+    currentCtx = &idle->context;
+
+    Process* pA = createKernelProcess(testEntryA);
+    Process* pB = createKernelProcess(testEntryB);
+    list_pushBack(&readyQueue, &pA->node);
+    list_pushBack(&readyQueue, &pB->node);
+
     __sync_synchronize();
     Render::print("Total Memory: %llu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
     Render::print("Reserve Memory: %llu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %llu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
     setInterrupt(true);
-    DiskOperationRequest request{};
-    request.length = 1024;
-    void* address = malloc(1024);
-    request.address = address;
-    request.type = DiskOperationType::READ;
-    request.sector = 1;
-    request.valid = false;
-    PrimaryDisk.operate(request);
     while (true) {}
 }

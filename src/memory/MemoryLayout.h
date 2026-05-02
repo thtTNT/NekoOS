@@ -4,7 +4,7 @@
 
 
 #pragma once
-#define MEMORY_SIZE 128 * 1024 * 1024
+#define MEMORY_SIZE 126 * 1024 * 1024
 #define PAGE_SIZE 4096
 #define PAGE_COUNT (MEMORY_SIZE / PAGE_SIZE)
 

@@ -3,6 +3,7 @@
 //
 
 #include "Trap.h"
+#include "../process/Scheduler.h"
 #include "../driver/render.h"
 #include "../driver/VirtioDisk.h"
 #include "../kernel.h"
@@ -27,8 +28,8 @@ void onTrap() {
     if (cause == SCAUSE_INTERRUPT_SUPERVISOR_EXTERNAL_INTERRUPT) {
         onDeviceInterrupt();
     } else if (cause == SCAUSE_INTERRUPT_SUPERVISOR_TIMER_INTERRUPT) {
-        Render::print("Timer interrupt\n");
         clint::setNextTimer();
+        schedule();
     } else {
         Render::print("Trap: unknown trap\n");
         while (true) {}
