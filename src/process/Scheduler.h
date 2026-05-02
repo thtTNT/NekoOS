@@ -4,6 +4,7 @@
 #include "../utils/ListNode.h"
 
 extern Process* current;
+extern Process* idleProcess;
 extern ProcessContext* currentCtx;
 extern ListNode readyQueue;
 

@@ -73,17 +73,9 @@ void initHeap() {
     Render::print("Heap initialized!\n");
 }
 
-void testEntryA() {
+void idleEntry() {
     while (true) {
-        Render::print("A");
-        for (volatile int i = 0; i < 1000000; i++);
-    }
-}
-
-void testEntryB() {
-    while (true) {
-        Render::print("B");
-        for (volatile int i = 0; i < 1000000; i++);
+        wfi();
     }
 }
 
@@ -96,24 +88,18 @@ void main0() {
     initDisk();
     initScheduler();
 
-    Process* idle = (Process*)malloc(sizeof(Process));
+    Process* idle = createKernelProcess(idleEntry);
     idle->pid = 0;
-    idle->state = RUNNING;
-    idle->pageTable = KernelPageTable;
-    memset(&idle->context, 0, sizeof(ProcessContext));
-    list_init(&idle->node);
+    idleProcess = idle;
     current = idle;
     currentCtx = &idle->context;
-
-    Process* pA = createKernelProcess(testEntryA);
-    Process* pB = createKernelProcess(testEntryB);
-    list_pushBack(&readyQueue, &pA->node);
-    list_pushBack(&readyQueue, &pB->node);
 
     __sync_synchronize();
     Render::print("Total Memory: %llu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
     Render::print("Reserve Memory: %llu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %llu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
     setInterrupt(true);
-    while (true) {}
+    while (true) {
+        wfi();
+    }
 }

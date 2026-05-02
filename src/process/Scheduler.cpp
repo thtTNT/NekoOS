@@ -5,6 +5,7 @@
 #include "../memory/Memory.h"
 
 Process* current = nullptr;
+Process* idleProcess = nullptr;
 ProcessContext* currentCtx = nullptr;
 ListNode readyQueue;
 
@@ -13,18 +14,24 @@ void initScheduler() {
 }
 
 void schedule() {
-    if (current != nullptr && current->state == RUNNING) {
+    if (current != nullptr && current->state == RUNNING && current != idleProcess) {
         current->state = READY;
         list_pushBack(&readyQueue, &current->node);
     }
 
+    Process* next;
+
     if (list_empty(&readyQueue)) {
-        return;
+        if (current == idleProcess) {
+            return;
+        }
+        next = idleProcess;
+    } else {
+        ListNode* node = readyQueue.next;
+        list_remove(node);
+        next = container_of(node, Process, node);
     }
 
-    ListNode* node = readyQueue.next;
-    list_remove(node);
-    Process* next = container_of(node, Process, node);
     next->state = RUNNING;
 
     if (next != current) {

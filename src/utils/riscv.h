@@ -204,3 +204,7 @@ static inline void sfence_vma() {
     // the zero, zero means flush all TLB entries.
     asm volatile("sfence.vma zero, zero");
 }
+
+static inline void wfi() {
+    asm volatile("wfi");
+}
