@@ -11,5 +11,6 @@ extern ListNode readyQueue;
 void initScheduler();
 void schedule();
 Process* createKernelProcess(void (*entry)());
+Process* createUserProcess(void* entry, void* ustackTop);
 
 extern "C" void switch_to(ProcessContext* nextCtx);

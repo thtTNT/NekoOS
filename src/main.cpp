@@ -54,6 +54,12 @@ void idleEntry() {
     }
 }
 
+void userTestEntry() {
+    while (true) {
+        asm volatile("nop");
+    }
+}
+
 void main0() {
     Render::print("====================NekoOS v0.1====================\n");
     initPageFrameAllocator();
@@ -68,6 +74,9 @@ void main0() {
     idleProcess = idle;
     current = idle;
     currentCtx = &idle->context;
+
+    Process* userTest = createUserProcess((void*)userTestEntry, (void*)0x3FFFFFF000);
+    list_pushBack(&readyQueue, &userTest->node);
 
     __sync_synchronize();
     Render::print("Total Memory: %llu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());

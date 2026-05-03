@@ -41,7 +41,9 @@ void PageTable::mapMemory(VirtualAddress startVirtualAddress, PhysicalAddress st
             pd->entries[virtualAddress.l0].readable = true;
             pd->entries[virtualAddress.l0].writable = true;
             pd->entries[virtualAddress.l0].executable = true;
-            pd->entries[virtualAddress.l0].user = user;
+        }
+        if (user) {
+            pd->entries[virtualAddress.l0].user = true;
         }
     }
 }

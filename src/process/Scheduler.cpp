@@ -3,6 +3,8 @@
 #include "../memory/PageTable.h"
 #include "../memory/Heap.h"
 #include "../memory/Memory.h"
+#include "../memory/KernelMapping.h"
+#include "../memory/PageFrameAllocator.h"
 
 Process* current = nullptr;
 Process* idleProcess = nullptr;
@@ -35,6 +37,12 @@ void schedule() {
     next->state = RUNNING;
 
     if (next != current) {
+        SATP satp{};
+        satp.physicalPageNumber = (uint64_t)next->pageTable / PAGE_SIZE;
+        satp.mode = 0x8;
+        w_satp(satp);
+        sfence_vma();
+
         current = next;
         currentCtx = &next->context;
         switch_to(currentCtx);
@@ -65,6 +73,49 @@ Process* createKernelProcess(void (*entry)()) {
 
     SSTATUS sstatus{};
     sstatus.spp = 1;
+    sstatus.spie = 1;
+    proc->context.sstatus = *(uint64_t*)&sstatus;
+
+    return proc;
+}
+
+static const int USER_STACK_PAGES = 4;
+
+Process* createUserProcess(void* entry, void* ustackTop) {
+    Process* proc = (Process*)malloc(sizeof(Process));
+    if (proc == nullptr) return nullptr;
+
+    void* kstack = malloc(PAGE_SIZE);
+    if (kstack == nullptr) {
+        mfree(proc);
+        return nullptr;
+    }
+
+    PageTable* pageTable = createUserPageTable();
+
+    uint64_t stackBottom = (uint64_t)ustackTop - USER_STACK_PAGES * PAGE_SIZE;
+    for (int i = 0; i < USER_STACK_PAGES; i++) {
+        void* va = (void*)(stackBottom + i * PAGE_SIZE);
+        void* pa = GlobalPageFrameAllocator.requestPage();
+        memset(pa, 0, PAGE_SIZE);
+        pageTable->mapMemory(va, pa, 1, true);
+    }
+
+    uint64_t codePage = (uint64_t)entry & ~(PAGE_SIZE - 1);
+    pageTable->mapMemory((void*)codePage, (void*)codePage, 1, true);
+
+    proc->pid = nextPid++;
+    proc->state = READY;
+    proc->pageTable = pageTable;
+    proc->kernelStack = (void*)((uint64_t)kstack + PAGE_SIZE);
+    list_init(&proc->node);
+
+    memset(&proc->context, 0, sizeof(ProcessContext));
+    proc->context.regs[2] = (uint64_t)ustackTop;
+    proc->context.sepc = (uint64_t)entry;
+
+    SSTATUS sstatus{};
+    sstatus.spp = 0;
     sstatus.spie = 1;
     proc->context.sstatus = *(uint64_t*)&sstatus;
 
