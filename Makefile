@@ -1,4 +1,4 @@
-.PHONY: qemu qemu-gdb
+.PHONY: qemu qemu-gdb docker-build docker-up docker-enter docker-down
 
 SRC_DIR=src
 OBJ_DIR=build/bin
@@ -47,3 +47,16 @@ qemu: $(BUILD_DIR)/kernel
 
 qemu-gdb: $(BUILD_DIR)/kernel
 	qemu-system-riscv64 $(QEMU_OPTIONS) -S -s
+
+# Docker
+docker-build:
+	docker compose build
+
+docker-up:
+	docker compose up -d
+
+docker-enter:
+	docker compose exec nekoos bash
+
+docker-down:
+	docker compose down
