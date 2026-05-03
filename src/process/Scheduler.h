@@ -13,4 +13,4 @@ void schedule();
 Process* createKernelProcess(void (*entry)());
 Process* createUserProcess(void* entry, void* ustackTop);
 
-extern "C" void switch_to(ProcessContext* nextCtx);
+extern "C" void switch_to(ProcessContext* nextCtx, uint64_t trapSP);

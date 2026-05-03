@@ -72,8 +72,6 @@ void main0() {
     Process* idle = createKernelProcess(idleEntry);
     idle->pid = 0;
     idleProcess = idle;
-    current = idle;
-    currentCtx = &idle->context;
 
     Process* userTest = createUserProcess((void*)userTestEntry, (void*)0x3FFFFFF000);
     list_pushBack(&readyQueue, &userTest->node);
@@ -83,7 +81,5 @@ void main0() {
     Render::print("Reserve Memory: %llu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %llu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
     setInterrupt(true);
-    while (true) {
-        wfi();
-    }
+    schedule();
 }

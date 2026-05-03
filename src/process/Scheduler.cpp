@@ -45,7 +45,9 @@ void schedule() {
 
         current = next;
         currentCtx = &next->context;
-        switch_to(currentCtx);
+
+        uint64_t trapSP = (next->pageTable == KernelPageTable) ? 0 : (uint64_t)next->kernelStack;
+        switch_to(currentCtx, trapSP);
     }
 }
 

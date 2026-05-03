@@ -3,6 +3,17 @@
 .global restore_context
 
 trap_entry:
+    csrrw sp, sscratch, sp     # sp ↔ sscratch; U→S: sp=内核栈顶 sscratch=用户sp
+    bnez sp, from_user          # S→S:   sp=0         sscratch=原内核sp
+
+from_kernel:
+    csrr sp, sscratch           # sp ← 原内核 sp
+    j save_common
+
+from_user:
+    # sp 已经是内核栈顶，直接保存
+
+save_common:
     addi sp, sp, -16
     sd t0, 0(sp)
     sd t1, 8(sp)
@@ -14,7 +25,8 @@ trap_entry:
     sd t1, 48(t0)
     ld t1, 0(sp)
     sd t1, 40(t0)
-    addi t1, sp, 16
+
+    csrr t1, sscratch
     sd t1, 16(t0)
 
     sd ra, 8(t0)
@@ -58,6 +70,19 @@ restore_context:
     la t1, currentCtx
     ld t1, 0(t1)
 
+    ld t2, 264(t1)              # sstatus
+    srli t3, t2, 8
+    andi t3, t3, 1              # t3 = SPP
+    bnez t3, to_kernel
+
+to_user:
+    csrw sscratch, sp           # sscratch ← 内核 sp（供下次 trap 用）
+    j restore_regs
+
+to_kernel:
+    csrw sscratch, zero         # sscratch ← 0（标记已在 S-mode）
+
+restore_regs:
     ld ra, 8(t1)
     ld sp, 16(t1)
     ld gp, 24(t1)
