@@ -6,7 +6,6 @@
 #include "memory/PageFrameAllocator.h"
 #include "memory/KernelMapping.h"
 #include "memory/Heap.h"
-#include "memory/Memory.h"
 #include "utils/riscv.h"
 #include "driver/render.h"
 #include "driver/VirtioDisk.h"
@@ -55,9 +54,20 @@ void idleEntry() {
 }
 
 void userTestEntry() {
-    while (true) {
-        asm volatile("nop");
-    }
+    asm volatile(
+        "j 2f\n"
+        "1: .ascii \"Hello from user mode!\\n\"\n"
+        "2:\n"
+        "li a7, 1\n"        // SYS_WRITE
+        "li a0, 1\n"        // FD_STDOUT
+        "la a1, 1b\n"
+        "li a2, 22\n"
+        "ecall\n"
+        "li a7, 2\n"        // SYS_EXIT
+        "li a0, 0\n"
+        "ecall\n"
+    );
+    while (1) {}
 }
 
 void main0() {
@@ -80,6 +90,9 @@ void main0() {
     Render::print("Total Memory: %llu Bytes\n", GlobalPageFrameAllocator.getTotalMemory());
     Render::print("Reserve Memory: %llu Bytes\n", GlobalPageFrameAllocator.getReserveMemory());
     Render::print("Locked Memory: %llu Bytes\n", GlobalPageFrameAllocator.getLockedMemory());
+
+    current = idleProcess;
+    currentCtx = &idleProcess->context;
     setInterrupt(true);
     schedule();
 }

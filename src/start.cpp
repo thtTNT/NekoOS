@@ -19,6 +19,11 @@ extern "C" void start() {
     sie.ssie = true;
     w_sie(sie);
 
+    // Allow S-mode to access user-accessible pages (U=1)
+    SSTATUS sstatus = r_sstatus();
+    sstatus.sum = true;
+    w_sstatus(sstatus);
+
     // Kick off the first timer interrupt
     clint::setNextTimer();
 

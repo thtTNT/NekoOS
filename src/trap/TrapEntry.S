@@ -4,6 +4,8 @@
 
 trap_entry:
     csrrw sp, sscratch, sp     # sp ↔ sscratch; U→S: sp=内核栈顶 sscratch=用户sp
+    li t0, 0x40000
+    csrs sstatus, t0           # ensure SUM=1 so S-mode can access user memory
     bnez sp, from_user          # S→S:   sp=0         sscratch=原内核sp
 
 from_kernel:

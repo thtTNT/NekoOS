@@ -10,7 +10,6 @@ Process* current = nullptr;
 Process* idleProcess = nullptr;
 ProcessContext* currentCtx = nullptr;
 ListNode readyQueue;
-
 void initScheduler() {
     list_init(&readyQueue);
 }
@@ -81,7 +80,7 @@ Process* createKernelProcess(void (*entry)()) {
     return proc;
 }
 
-static const int USER_STACK_PAGES = 4;
+static const int USER_STACK_PAGES = 16;
 
 Process* createUserProcess(void* entry, void* ustackTop) {
     Process* proc = (Process*)malloc(sizeof(Process));
@@ -103,8 +102,12 @@ Process* createUserProcess(void* entry, void* ustackTop) {
         pageTable->mapMemory(va, pa, 1, true);
     }
 
+    // Alias: same physical page at a different VA with U=1 for user execution.
+    // S-mode retains the original identity mapping at U=0 for kernel access.
     uint64_t codePage = (uint64_t)entry & ~(PAGE_SIZE - 1);
-    pageTable->mapMemory((void*)codePage, (void*)codePage, 1, true);
+    uint64_t offset = (uint64_t)entry - codePage;
+    uint64_t userCodeAddr = 0x1000;
+    pageTable->mapMemory((void*)userCodeAddr, (void*)codePage, 1, true);
 
     proc->pid = nextPid++;
     proc->state = READY;
@@ -114,7 +117,7 @@ Process* createUserProcess(void* entry, void* ustackTop) {
 
     memset(&proc->context, 0, sizeof(ProcessContext));
     proc->context.regs[2] = (uint64_t)ustackTop;
-    proc->context.sepc = (uint64_t)entry;
+    proc->context.sepc = userCodeAddr + offset;
 
     SSTATUS sstatus{};
     sstatus.spp = 0;
