@@ -12,11 +12,6 @@
 
 extern char KERNEL_END_ADDRESS[];
 
-void memset(void* start, uint8_t value, size_t length);
-
-void* memcpy(void* dest, const void* src, size_t length);
-
-
 struct VirtualAddress {
     uint16_t offset: 12;
     uint16_t l0: 9;

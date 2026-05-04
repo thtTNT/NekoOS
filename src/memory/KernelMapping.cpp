@@ -3,6 +3,7 @@
 #include "Memory.h"
 #include "../utils/riscv.h"
 #include "../driver/VirtioDisk.h"
+#include <string.h>
 
 static void mapKernelSpace(PageTable* pageTable) {
     for (uint64_t address = KERNEL_START; address < MEMORY_END; address += PAGE_SIZE) {

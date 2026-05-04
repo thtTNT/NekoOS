@@ -4,6 +4,7 @@
 
 #include "PageFrameAllocator.h"
 #include "../utils/assert.h"
+#include <string.h>
 
 PageFrameAllocator GlobalPageFrameAllocator; // NOLINT(cert-err58-cpp)
 

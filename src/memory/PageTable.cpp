@@ -5,6 +5,7 @@
 #include "PageTable.h"
 #include "PageFrameAllocator.h"
 #include "../utils/riscv.h"
+#include <string.h>
 
 PageTable* KernelPageTable;
 

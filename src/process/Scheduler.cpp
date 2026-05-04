@@ -5,6 +5,7 @@
 #include "../memory/Memory.h"
 #include "../memory/KernelMapping.h"
 #include "../memory/PageFrameAllocator.h"
+#include <string.h>
 
 Process* current = nullptr;
 Process* idleProcess = nullptr;

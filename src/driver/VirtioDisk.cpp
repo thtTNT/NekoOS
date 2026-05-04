@@ -7,6 +7,7 @@
 #include "../driver/render.h"
 #include "../memory/PageFrameAllocator.h"
 #include "../utils/assert.h"
+#include <string.h>
 
 VirtioDisk PrimaryDisk;  // NOLINT(cert-err58-cpp)
 
