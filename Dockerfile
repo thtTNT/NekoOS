@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils-riscv64-unknown-elf \
     # QEMU for RISC-V
     qemu-system-riscv64 \
-    # Node.js for filesystem script
-    nodejs \
+    # FAT filesystem tools (mkfs.fat, mcopy)
+    dosfstools \
+    mtools \
     # General dev tools
     make \
     gdb-multiarch \

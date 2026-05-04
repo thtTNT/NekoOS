@@ -1,13 +1,13 @@
-.PHONY: qemu qemu-gdb docker-build docker-up docker-enter docker-down
+.PHONY: qemu qemu-gdb docker-build docker-up docker-enter docker-down filesystem
 
 SRC_DIR=src
 OBJ_DIR=build/bin
 BUILD_DIR=build
 LD=riscv64-unknown-elf-ld
 CC=riscv64-unknown-elf-gcc
-NODE = node
 CFLAGS=-ffreestanding -fshort-wchar -no-pie -fno-exceptions -mcmodel=medany -std=gnu++17 -nostdlib -c -ggdb -Wall -Werror -Isrc/libc
 LDFLAGS = -z max-page-size=4096
+IMAGE_PATH=build/disk.img
 
 SRC = $(wildcard $(SRC_DIR)/*.cpp $(SRC_DIR)/**/*.cpp)
 ASM_SRC = $(wildcard $(SRC_DIR)/*.S $(SRC_DIR)/**/*.S)
@@ -28,15 +28,14 @@ $(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.S
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Filesystem
-export IMAGE_PATH = build/disk.img
-export IMAGE_SIZE = 33554432
+$(IMAGE_PATH):
+	@mkdir -p $(BUILD_DIR)
+	dd if=/dev/zero of=$@ bs=1M count=32
+	mkfs.fat -F 32 $@
 
 filesystem: $(IMAGE_PATH)
 
-$(IMAGE_PATH):
-	$(NODE) filesystem/makeFileSystem.js
-
-# GDB
+# QEMU
 QEMU_OPTIONS = -machine virt -kernel $(BUILD_DIR)/kernel -m 128M -smp 1 -nographic
 QEMU_OPTIONS += -drive file=$(IMAGE_PATH),if=none,format=raw,id=x0
 QEMU_OPTIONS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
